@@ -28,6 +28,7 @@ import org.ossreviewtoolkit.utils.spdxexpression.SpdxCompoundExpression
 import org.ossreviewtoolkit.utils.spdxexpression.SpdxExpression
 import org.ossreviewtoolkit.utils.spdxexpression.SpdxExpression.Strictness.ALLOW_LICENSEREF_EXCEPTIONS
 import org.ossreviewtoolkit.utils.spdxexpression.toExpression
+import java.time.Instant
 
 /**
  * This class contains curation data for a package. It is used to amend the automatically detected metadata for a
@@ -82,6 +83,11 @@ data class PackageCurationData(
      * The remote artifact where the source package can be downloaded.
      */
     val sourceArtifact: RemoteArtifact? = null,
+
+    /**
+     * The timestamp when the package was published, usually to a package registry like Maven Central.
+     */
+    val publishedAt: Instant? = null,
 
     /**
      * VCS-related information.
@@ -200,6 +206,7 @@ data class PackageCurationData(
             homepageUrl = homepageUrl ?: other.homepageUrl,
             binaryArtifact = binaryArtifact ?: other.binaryArtifact,
             sourceArtifact = sourceArtifact ?: other.sourceArtifact,
+            publishedAt = publishedAt ?: other.publishedAt,
             vcs = vcs?.merge(other.vcs ?: vcs) ?: other.vcs,
             isMetadataOnly = isMetadataOnly ?: other.isMetadataOnly,
             isModified = isModified ?: other.isModified,

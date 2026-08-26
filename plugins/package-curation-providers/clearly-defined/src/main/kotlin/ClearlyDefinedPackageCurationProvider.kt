@@ -19,6 +19,7 @@
 
 package org.ossreviewtoolkit.plugins.packagecurationproviders.clearlydefined
 
+import kotlinx.datetime.toInstant
 import java.net.HttpURLConnection
 
 import okhttp3.OkHttpClient
@@ -53,6 +54,8 @@ import org.ossreviewtoolkit.utils.spdxexpression.SpdxExpression.Strictness
 import org.ossreviewtoolkit.utils.spdxexpression.toSpdxOrNull
 
 import retrofit2.HttpException
+import java.time.LocalDate
+import java.time.ZoneOffset
 
 data class ClearlyDefinedPackageCurationProviderConfig(
     /**
@@ -153,6 +156,10 @@ class ClearlyDefinedPackageCurationProvider(
                 concludedLicense = declaredLicenseParsed,
                 homepageUrl = curation.described?.projectWebsite?.toString(),
                 sourceArtifact = sourceLocation as? RemoteArtifact,
+                publishedAt = curation.described?.releaseDate?.let {
+                    val date = LocalDate.parse(it)
+                    date.atStartOfDay(ZoneOffset.UTC).toInstant()
+                },
                 vcs = sourceLocation as? VcsInfoCurationData
             )
 

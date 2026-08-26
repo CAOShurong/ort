@@ -33,6 +33,7 @@ import org.ossreviewtoolkit.utils.ort.ProcessedDeclaredLicense
 import org.ossreviewtoolkit.utils.spdxexpression.SpdxCompoundExpression
 import org.ossreviewtoolkit.utils.spdxexpression.SpdxOperator
 import org.ossreviewtoolkit.utils.spdxexpression.toSpdx
+import java.time.Instant
 
 class PackageCurationTest : WordSpec({
     "Applying a single curation" should {
@@ -59,6 +60,7 @@ class PackageCurationTest : WordSpec({
                         url = "http://source.artifact",
                         hash = Hash.create("source.hash")
                     ),
+                    publishedAt = Instant.EPOCH,
                     vcs = VcsInfoCurationData(
                         type = VcsType.GIT,
                         url = "http://url.git",
