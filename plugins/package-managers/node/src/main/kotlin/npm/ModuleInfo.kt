@@ -66,52 +66,11 @@ internal data class ModuleInfo(
     val resolved: String? = null
 )
 
-internal fun ModuleInfo.getAllPackageNodeModuleIds(scopes: Set<Scope>): Set<String> =
-    buildSet {
-        val queue = scopes.flatMapTo(LinkedList()) { getScopeDependencies(it) }
-
-        while (queue.isNotEmpty()) {
-            val info = queue.removeFirst()
-
-            @Suppress("ComplexCondition")
-            if (!info.isProject && info.isInstalled && !info.name.isNullOrBlank() && !info.version.isNullOrBlank()) {
-                add("${info.name}@${info.version}")
-            }
-
-            if (info.isProject) {
-                scopes.flatMapTo(queue) { info.getScopeDependencies(it) }
-            } else {
-                // Ignore dev-dependencies of dependencies, as this is what NPM does itself.
-                queue += info.getScopeDependencies(Scope.DEPENDENCIES)
-            }
-        }
-    }
-
 internal fun ModuleInfo.getScopeDependencies(scope: Scope) =
     when (scope) {
         Scope.DEPENDENCIES -> dependencies.values.filter { !it.dev && it.isInstalled }
         Scope.DEV_DEPENDENCIES -> dependencies.values.filter { it.dev && !it.optional && it.isInstalled }
     }
-
-internal fun ModuleInfo.undoDeduplication(): ModuleInfo {
-    val replacements = getNonDeduplicatedModuleInfosForId()
-
-    fun ModuleInfo.undoDeduplicationRec(ancestorsIds: Set<String> = emptySet()): ModuleInfo {
-        val dependencyAncestorIds = ancestorsIds + setOfNotNull(id)
-        val replacement = replacements[id] ?: this
-
-        return replacement.copy(
-            dependencies = replacement.dependencies
-                .filter { it.value.id !in dependencyAncestorIds } // break cycles.
-                .mapValues { it.value.undoDeduplicationRec(dependencyAncestorIds) }
-        )
-    }
-
-    return undoDeduplicationRec()
-}
-
-internal fun ModuleInfo.filterInstalled(): ModuleInfo =
-    copy(dependencies = dependencies.filter { it.value.isInstalled })
 
 internal fun ModuleInfo.getNonDeduplicatedModuleInfosForId(): Map<String, ModuleInfo> {
     val queue = LinkedList<ModuleInfo>().apply { add(this@getNonDeduplicatedModuleInfosForId) }
